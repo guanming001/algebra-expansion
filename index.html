@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Expansion of Algebraic Expressions – Levels 1·2·3</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    :root {
+      --primary:#4f46e5; --primary-dark:#4338ca; --primary-light:#e0e7ff;
+      --success:#10b981; --success-light:#d1fae5;
+      --error:#ef4444;   --error-light:#fee2e2;
+      --warning:#f59e0b; --warning-light:#fef3c7;
+      --gray-50:#f9fafb; --gray-100:#f3f4f6; --gray-200:#e5e7eb;
+      --gray-300:#d1d5db; --gray-400:#9ca3af; --gray-500:#6b7280;
+      --gray-600:#4b5563; --gray-700:#374151; --gray-800:#1f2937;
+      --white:#ffffff;
+      --level1:#34D399; --level1-light:#ECFDF5;
+      --level2:#60A5FA; --level2-light:#EFF6FF;
+      --level3:#818cf8; --level3-light:#eef2ff;
+      --touch-target:48px;
+      --radius-sm:6px; --radius-md:8px; --radius-lg:12px; --radius-xl:16px;
+      --shadow-sm:0 1px 2px rgba(0,0,0,.05);
+      --shadow-md:0 4px 6px -1px rgba(0,0,0,.1);
+      --shadow-lg:0 10px 15px -3px rgba(0,0,0,.1);
+      --g1-bg:#dbeafe; --g1-bd:#3b82f6;
+      --g2-bg:#fed7aa; --g2-bd:#f97316;
+      --g3-bg:#ede9fe; --g3-bd:#8b5cf6;
+      --g4-bg:#ccfbf1; --g4-bd:#14b8a6;
+    }
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    html,body{
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+      font-size:16px;line-height:1.4;color:var(--gray-800);
+      background:linear-gradient(135deg,#e0e7ff 0%,#f0f9ff 100%);
+      min-height:100dvh;overscroll-behavior:none;touch-action:manipulation;
+    }
+    button,input{font:inherit;}
+    @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-4px)}40%,80%{transform:translateX(4px)}}
+    @keyframes pulse-ok{0%,100%{box-shadow:0 0 0 0 rgba(16,185,129,.15)}50%{box-shadow:0 0 0 10px rgba(16,185,129,0)}}
+    @keyframes fade-up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    .step-card{animation:fade-up .25s ease;}
+    .chip{display:inline-flex;align-items:center;padding:6px 14px;border-radius:999px;
+      border:2px solid var(--gray-300);background:white;font-family:"Times New Roman",serif;
+      font-size:1.05rem;cursor:pointer;position:relative;transition:border-color .15s,background .15s;
+      min-height:44px;user-select:none;}
+    .chip.sel{border-color:var(--primary);background:var(--primary-light);}
+    .chip.g1{border-color:var(--g1-bd);background:var(--g1-bg);}
+    .chip.g2{border-color:var(--g2-bd);background:var(--g2-bg);}
+    .chip.g3{border-color:var(--g3-bd);background:var(--g3-bg);}
+    .chip.g4{border-color:var(--g4-bd);background:var(--g4-bg);}
+    .blank{min-width:60px;height:44px;padding:0 10px;
+      display:inline-flex;align-items:center;justify-content:center;
+      border:2px dashed var(--gray-300);border-radius:var(--radius-md);
+      background:rgba(255,255,255,.88);color:var(--gray-500);
+      font-family:"Times New Roman",serif;font-size:1.05rem;
+      transition:all .15s ease;cursor:pointer;}
+    .blank.filled{border-style:solid;border-color:var(--primary);background:var(--primary-light);color:var(--gray-800);font-weight:600;}
+    .blank.correct{border-color:var(--success);background:var(--success-light);color:#065f46;cursor:default;}
+    .blank.incorrect{border-color:var(--error);background:var(--error-light);color:#991b1b;animation:shake .4s ease;}
+    .blank.active{outline:2px solid var(--primary);outline-offset:2px;}
+    .blank.dragover{border-color:#ca8a04;background:#fef9c3;outline:2px solid #fde047;outline-offset:1px;}
+    .tile{min-width:56px;height:44px;padding:0 14px;
+      border:1px solid var(--gray-300);border-radius:var(--radius-md);
+      background:var(--white);color:var(--gray-800);
+      font-family:"Times New Roman",serif;font-size:18px;cursor:pointer;
+      box-shadow:var(--shadow-sm);transition:transform .12s,background .12s,border-color .12s;
+      touch-action:none;}
+    .tile:hover{border-color:var(--primary);background:var(--primary-light);}
+    .tile:active{transform:scale(.95);}
+    .tile.used{opacity:.3;pointer-events:none;}
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useEffect, useLayoutEffect, useMemo, useRef, useState } = React;
+
+// ─── Utilities ────────────────────────────────────────────────────────────────
+const VARS = ["x","y","a","b","m","n","p","k"];
+const GC = [
+  {bg:"#dbeafe",bd:"#3b82f6"},
+  {bg:"#fed7aa",bd:"#f97316"},
+  {bg:"#ede9fe",bd:"#8b5cf6"},
+  {bg:"#ccfbf1",bd:"#14b8a6"},
+];
+function randInt(min,max){return min+Math.floor(Math.random()*(max-min+1));}
+function randChoice(arr){return arr[Math.floor(Math.random()*arr.length)];}
+function shuffle(arr){const c=[...arr];for(let i=c.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[c[i],c[j]]=[c[j],c[i]];}return c;}
+function hcf(a,b){let x=Math.abs(a),y=Math.abs(b);while(y)[x,y]=[y,x%y];return x||1;}
+
+// Term = {coeff, p}
+function tKey(t){return `${t.coeff},${t.p}`;}
+function tEq(a,b){return a.coeff===b.coeff&&a.p===b.p;}
+function tMul(t1,t2){return{coeff:t1.coeff*t2.coeff,p:t1.p+t2.p};}
+function collectLike(terms){
+  const map={};
+  terms.forEach(t=>{const k=`${t.p}`;if(!map[k])map[k]={coeff:0,p:t.p};map[k].coeff+=t.coeff;});
+  return Object.values(map).filter(t=>t.coeff!==0).sort((a,b)=>b.p-a.p);
+}
+function tToLatex(t,v,isFirst=false){
+  if(t.coeff===0)return"0";
+  const absC=Math.abs(t.coeff);
+  const sign=t.coeff<0?"-":(isFirst?"":"+");
+  let vp="";
+  if(t.p===1)vp=v;
+  else if(t.p===2)vp=`${v}^2`;
+  const cs=(absC===1&&vp)?"":String(absC);
+  return`${sign}${cs}${vp}`;
+}
+function genDistractors(correct,v,count=5){
+  const{coeff,p}=correct;
+  const cands=[
+    {coeff:coeff+1,p},{coeff:coeff-1,p},{coeff:coeff+2,p},{coeff:coeff-2,p},
+    {coeff:-coeff,p},{coeff:coeff*2,p},
+    {coeff,p:Math.max(0,p-1)},{coeff,p:p+1},
+    {coeff:coeff+3,p},{coeff:coeff-3,p},
+  ].filter(t=>t.coeff!==0&&!tEq(t,correct)&&t.p>=0&&t.p<=2);
+  const seen=new Set([tKey(correct)]);
+  return cands.filter(t=>{const k=tKey(t);if(seen.has(k))return false;seen.add(k);return true;}).slice(0,count);
+}
+function pickTiles(required,distractors,size=8){
+  const result=[];const counts=new Map();
+  required.forEach(t=>{const k=tKey(t);counts.set(k,(counts.get(k)||0)+1);result.push({...t});});
+  shuffle(distractors).forEach(t=>{
+    if(result.length<size&&!counts.has(tKey(t))){counts.set(tKey(t),1);result.push(t);}
+  });
+  let off=1;
+  while(result.length<size){
+    const fill={coeff:(required[0]?.coeff||1)+result.length+off,p:0};
+    if(!counts.has(tKey(fill))){counts.set(tKey(fill),1);result.push(fill);}else off++;
+  }
+  return shuffle(result);
+}
+
+// ─── Problem generators ───────────────────────────────────────────────────────
+const PROBLEMS_PER_LEVEL = 3;
+
+function generateL1(){
+  const v=randChoice(VARS);
+  const a=randInt(2,5);
+  let b,c;
+  do{b=randInt(1,5);c=randInt(1,5);}while(hcf(b,c)!==1||b*a>40||c*a>40);
+  const sign=randChoice([1,-1]);
+  const mult={coeff:a,p:0};
+  const inner=[{coeff:b,p:1},{coeff:sign*c,p:0}];
+  const products=inner.map(t=>tMul(mult,t));
+  return{level:1,v,mult,inner,products,
+    qTex:`${a}(${b}${v} ${sign>0?"+":"-"} ${c})`};
+}
+
+function generateL2(){
+  const v=randChoice(VARS);
+  let a,b,c,d,e,f;
+  do{
+    a=randInt(2,5);b=randInt(1,4);c=randInt(1,5);
+    d=randInt(2,5);e=randInt(1,4);f=randInt(1,5);
+  }while(a*b===d*e);
+  const s1=randChoice([1,-1]),s2=randChoice([1,-1]);
+  const op=randChoice([1,-1]);
+  const m1={coeff:a,p:0};
+  const in1=[{coeff:b,p:1},{coeff:s1*c,p:0}];
+  const p1=in1.map(t=>tMul(m1,t));
+  const m2={coeff:d,p:0};
+  const in2=[{coeff:e,p:1},{coeff:s2*f,p:0}];
+  const p2raw=in2.map(t=>tMul(m2,t));
+  const p2=p2raw.map(t=>({...t,coeff:t.coeff*op}));
+  const allProds=[...p1,...p2];
+  const simplified=collectLike(allProds);
+  const b1tex=`${a}(${b}${v}${s1>0?" + ":" - "}${c})`;
+  const b2tex=`${d}(${e}${v}${s2>0?" + ":" - "}${f})`;
+  const qTex=op>0?`${b1tex} + ${b2tex}`:`${b1tex} - ${b2tex}`;
+  return{level:2,v,m1,in1,p1,m2,in2,p2raw,p2,op,allProds,simplified,qTex,s1,s2,a,b,c,d,e,f};
+}
+
+// Level 3: (ax + b)(cx + d)
+// Step 1: expand first term of b1 (ax) across b2  → ax*cx, ax*d
+// Step 2: expand second term of b1 (b) across b2  → b*cx, b*d
+// Step 3: collect all 4 products
+function generateL3(){
+  const v=randChoice(VARS);
+  let a,b,c,d;
+  do{
+    a=randInt(1,4);
+    b=randInt(1,5)*randChoice([1,-1]);
+    c=randInt(1,4);
+    d=randInt(1,5)*randChoice([1,-1]);
+  }while(
+    (a===1&&c===1&&Math.abs(b)===Math.abs(d))||
+    (a*d+b*c===0)
+  );
+  // b1 = [ax, b(const)],  b2 = [cx, d(const)]
+  const b1=[{coeff:a,p:1},{coeff:b,p:0}];
+  const b2=[{coeff:c,p:1},{coeff:d,p:0}];
+  // products from b1[0]*b2, then b1[1]*b2
+  const prods1=b2.map(t=>tMul(b1[0],t)); // ax*(cx), ax*(d)
+  const prods2=b2.map(t=>tMul(b1[1],t)); // b*(cx),  b*(d)
+  const allProds=[...prods1,...prods2];
+  const simplified=collectLike(allProds);
+  const t1=tToLatex(b1[0],v,true)+tToLatex(b1[1],v,false);
+  const t2=tToLatex(b2[0],v,true)+tToLatex(b2[1],v,false);
+  const qTex=`(${t1})(${t2})`;
+  return{level:3,v,b1,b2,prods1,prods2,allProds,simplified,qTex};
+}
+
+function buildProblems(level){
+  const gen=level===1?generateL1:level===2?generateL2:generateL3;
+  const problems=[];const seen=new Set();let guard=0;
+  while(problems.length<PROBLEMS_PER_LEVEL&&guard<400){
+    guard++;const p=gen();
+    if(!seen.has(p.qTex)){seen.add(p.qTex);problems.push(p);}
+  }
+  return problems;
+}
+
+// ─── KaTeX ────────────────────────────────────────────────────────────────────
+function KT({tex}){
+  const ref=useRef();
+  useEffect(()=>{
+    if(!ref.current||!window.katex)return;
+    try{katex.render(tex,ref.current,{throwOnError:false,displayMode:false});}catch(e){}
+  },[tex]);
+  return<span ref={ref} style={{fontFamily:"Times New Roman,serif"}}/>;
+}
+
+// ─── TileBank — v prop fixes the "?" bug ──────────────────────────────────────
+function TileBank({tiles,v,onTap,usedMap}){
+  return(
+    <div style={{display:"flex",flexWrap:"wrap",gap:8,justifyContent:"center",marginBottom:10}}>
+      {tiles.map((tile,idx)=>{
+        const k=tKey(tile);
+        const totalUsed=usedMap.get(k)||0;
+        const claimedBefore=tiles.slice(0,idx).filter(t=>tKey(t)===k).length;
+        const isUsed=claimedBefore<totalUsed;
+        return(
+          <button key={idx} className={`tile${isUsed?" used":""}`} disabled={isUsed}
+            onClick={()=>!isUsed&&onTap(tile)}
+            draggable={!isUsed}
+            onDragStart={e=>{e.dataTransfer.setData("application/x-tile",JSON.stringify(tile));e.dataTransfer.effectAllowed="copy";}}>
+            <KT tex={tToLatex(tile,v,false)}/>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+// ─── BlankRow ─────────────────────────────────────────────────────────────────
+function BlankRow({prefix,blanks,filledBlanks,checkedBlanks,activeBlankId,v,onActivate,onDrop}){
+  return(
+    <div style={{display:"flex",flexWrap:"wrap",gap:8,justifyContent:"center",alignItems:"center",marginBottom:8}}>
+      {prefix&&<KT tex={prefix}/>}
+      {blanks.map((b,idx)=>{
+        const val=filledBlanks[b.id];
+        const st=checkedBlanks[b.id]||(val?"filled":"empty");
+        const isActive=activeBlankId===b.id;
+        return(
+          <span key={b.id}
+            className={`blank ${st}${isActive?" active":""}`}
+            onClick={()=>onActivate(b.id)}
+            onDragOver={e=>{if(st!=="correct")e.preventDefault();}}
+            onDrop={e=>{
+              e.preventDefault();if(st==="correct")return;
+              try{onDrop(b.id,JSON.parse(e.dataTransfer.getData("application/x-tile")));}catch{}
+            }}>
+            {val?<KT tex={tToLatex(val,v,idx===0)}/>:<span style={{color:"var(--gray-400)"}}>?</span>}
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
+// ─── DistributePhase ──────────────────────────────────────────────────────────
+function DistributePhase({mult,inner,v,prefix,onDone,bracketColor}){
+  const blanks=useMemo(()=>inner.map((t,i)=>({id:`dp-${i}`,correct:tMul(mult,t)})),[]);
+  const[tiles]=useState(()=>{
+    const req=blanks.map(b=>b.correct);
+    const dis=req.flatMap(t=>genDistractors(t,v));
+    return pickTiles(req,dis,Math.max(8,req.length+4));
+  });
+  const[filled,setFilled]=useState({});
+  const[checked,setChecked]=useState({});
+  const[active,setActive]=useState(blanks[0]?.id||null);
+  const allOk=blanks.every(b=>checked[b.id]==="correct");
+  const usedMap=useMemo(()=>{const m=new Map();Object.values(filled).forEach(t=>{const k=tKey(t);m.set(k,(m.get(k)||0)+1);});return m;},[filled]);
+
+  function activate(id){
+    if(checked[id]==="correct")return;
+    if(filled[id]){setFilled(f=>{const{[id]:_,...r}=f;return r;});setChecked(c=>({...c,[id]:undefined}));}
+    setActive(id);
+  }
+  function placeTile(tile,targetId){
+    const tid=targetId||(active&&checked[active]!=="correct"?active:blanks.find(b=>checked[b.id]!=="correct"&&!filled[b.id])?.id);
+    if(!tid)return;
+    const next=blanks.find(b=>b.id!==tid&&checked[b.id]!=="correct"&&!filled[b.id])?.id??tid;
+    setActive(next);setFilled(f=>({...f,[tid]:tile}));setChecked(c=>({...c,[tid]:undefined}));
+  }
+  function checkAll(){
+    const nc={...checked};let wrong=false;
+    blanks.forEach(b=>{
+      if(nc[b.id]==="correct"||!filled[b.id])return;
+      const ok=tEq(filled[b.id],b.correct);nc[b.id]=ok?"correct":"incorrect";if(!ok)wrong=true;
+    });
+    setChecked(nc);
+    const next=blanks.find(b=>nc[b.id]!=="correct"&&!filled[b.id])?.id??blanks.find(b=>nc[b.id]==="incorrect")?.id??null;
+    setActive(next);
+  }
+  useEffect(()=>{if(allOk&&blanks.length>0)setTimeout(()=>onDone(blanks.map(b=>b.correct),!Object.values(checked).some(s=>s==="incorrect")),300);},[allOk]);
+
+  const prefixTex=prefix||`${mult.coeff}(${inner.map((t,i)=>tToLatex(t,v,i===0)).join("")}) =`;
+
+  return(
+    <div>
+      <BlankRow prefix={prefixTex} blanks={blanks} filledBlanks={filled} checkedBlanks={checked}
+        activeBlankId={active} v={v} onActivate={activate} onDrop={(id,tile)=>placeTile(tile,id)}/>
+      {!allOk&&(
+        <>
+          <TileBank tiles={tiles} v={v} onTap={t=>placeTile(t,null)} usedMap={usedMap}/>
+          <div style={{display:"flex",justifyContent:"center"}}>
+            <button onClick={checkAll}
+              disabled={!blanks.some(b=>filled[b.id]&&checked[b.id]!=="correct")}
+              style={{minHeight:"var(--touch-target)",padding:"10px 28px",border:"none",
+                borderRadius:"var(--radius-md)",background:bracketColor||"var(--primary)",color:"white",
+                fontWeight:700,cursor:"pointer",fontSize:15,
+                opacity:blanks.some(b=>filled[b.id]&&checked[b.id]!=="correct")?1:.4}}>
+              Check
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+// ─── RainbowPhase ─────────────────────────────────────────────────────────────
+function RainbowPhase({mult,inner,v,onDone,bracketColor}){
+  const containerRef=useRef();
+  const chip0Ref=useRef();
+  const chipRefs=useRef({});
+  const[pairs,setPairs]=useState([]);
+  const[sel,setSel]=useState(null);
+  const[drag,setDrag]=useState(null);
+  const[arcsDone,setArcsDone]=useState(false);
+
+  const fillBlanks=useMemo(()=>inner.map((t,i)=>({id:`rf-${i}`,correct:tMul(mult,t)})),[]);
+  const[fillTiles]=useState(()=>{
+    const req=fillBlanks.map(b=>b.correct);
+    return pickTiles(req,req.flatMap(t=>genDistractors(t,v)),Math.max(8,req.length+4));
+  });
+  const[filled,setFilled]=useState({});
+  const[checked,setChecked]=useState({});
+  const[active,setActive]=useState(null);
+  const allArcs=pairs.length===inner.length;
+  const allFillOk=fillBlanks.every(b=>checked[b.id]==="correct");
+  const activePairIdx=arcsDone&&active?+active.split('-')[1]:null;
+
+  useEffect(()=>{if(allArcs&&!arcsDone)setTimeout(()=>{setArcsDone(true);setActive(fillBlanks[0]?.id||null);},400);},[allArcs]);
+  useEffect(()=>{if(allFillOk&&fillBlanks.length>0)setTimeout(()=>onDone(fillBlanks.map(b=>b.correct),!Object.values(checked).some(s=>s==="incorrect")),300);},[allFillOk]);
+
+  function getArcAbove(x1,y1,x2,y2){const h=Math.abs(x2-x1)*.3+22;return`M ${x1} ${y1} C ${x1} ${y1-h}, ${x2} ${y2-h}, ${x2} ${y2}`;}
+
+  function handleInner(i){
+    if(arcsDone||sel===null)return;
+    if(pairs.some(p=>p.i2===i))return;
+    const ci=pairs.length%GC.length;
+    setPairs(ps=>[...ps,{i2:i,ci}]);setSel(null);
+  }
+  function onDS(e){if(arcsDone)return;e.preventDefault();const pt=e.touches?.[0]||e;setDrag({x:pt.clientX,y:pt.clientY});setSel(0);}
+  function onDM(e){if(!drag)return;const pt=e.touches?.[0]||e;setDrag(d=>({...d,x:pt.clientX,y:pt.clientY}));}
+  function onDE(e){
+    if(!drag)return;
+    const pt=e.changedTouches?.[0]||e;let landed=null;
+    Object.entries(chipRefs.current).forEach(([i,ref])=>{
+      if(!ref)return;const r=ref.getBoundingClientRect();
+      if(pt.clientX>=r.left&&pt.clientX<=r.right&&pt.clientY>=r.top&&pt.clientY<=r.bottom)landed=+i;
+    });
+    if(landed!==null)handleInner(landed);
+    setDrag(null);setSel(null);
+  }
+
+  const arcPaths=useMemo(()=>{
+    if(!containerRef.current||!chip0Ref.current)return[];
+    const cr=containerRef.current.getBoundingClientRect();
+    const r0=chip0Ref.current.getBoundingClientRect();
+    const x1=r0.left-cr.left+r0.width/2,y1=r0.top-cr.top;
+    return pairs.map(p=>{
+      const r2=chipRefs.current[p.i2];if(!r2)return null;
+      const rr=r2.getBoundingClientRect();
+      const x2=rr.left-cr.left+rr.width/2,y2=rr.top-cr.top;
+      const isActive=arcsDone&&activePairIdx===p.i2;
+      const isDone=checked[`rf-${p.i2}`]==="correct";
+      return{path:getArcAbove(x1,y1,x2,y2),color:GC[p.ci].bd,isActive,isDone};
+    }).filter(Boolean);
+  });
+
+  let dragArc=null;
+  if(drag&&containerRef.current&&chip0Ref.current){
+    const cr=containerRef.current.getBoundingClientRect();
+    const r0=chip0Ref.current.getBoundingClientRect();
+    const x1=r0.left-cr.left+r0.width/2,y1=r0.top-cr.top;
+    dragArc=getArcAbove(x1,y1,drag.x-cr.left,drag.y-cr.top);
+  }
+
+  function fActivate(id){
+    if(checked[id]==="correct")return;
+    if(filled[id]){setFilled(f=>{const{[id]:_,...r}=f;return r;});setChecked(c=>({...c,[id]:undefined}));}
+    setActive(id);
+  }
+  function fTile(tile,targetId){
+    const tid=targetId||(active&&checked[active]!=="correct"?active:fillBlanks.find(b=>checked[b.id]!=="correct"&&!filled[b.id])?.id);
+    if(!tid)return;
+    const next=fillBlanks.find(b=>b.id!==tid&&checked[b.id]!=="correct"&&!filled[b.id])?.id??tid;
+    setActive(next);setFilled(f=>({...f,[tid]:tile}));setChecked(c=>({...c,[tid]:undefined}));
+  }
+  function fCheck(){
+    const nc={...checked};let wrong=false;
+    fillBlanks.forEach(b=>{
+      if(nc[b.id]==="correct"||!filled[b.id])return;
+      const ok=tEq(filled[b.id],b.correct);nc[b.id]=ok?"correct":"incorrect";if(!ok)wrong=true;
+    });
+    setChecked(nc);
+    const next=fillBlanks.find(b=>nc[b.id]!=="correct"&&!filled[b.id])?.id??fillBlanks.find(b=>nc[b.id]==="incorrect")?.id??null;
+    setActive(next);
+  }
+  const usedMap=useMemo(()=>{const m=new Map();Object.values(filled).forEach(t=>{const k=tKey(t);m.set(k,(m.get(k)||0)+1);});return m;},[filled]);
+
+  // For display we show the multiplier chip as a term (e.g. "3x" or "−5")
+  const multTex=tToLatex(mult,v,true);
+
+  return(
+    <div>
+      <p style={{fontSize:13,color:"var(--gray-500)",textAlign:"center",marginBottom:8}}>
+        {arcsDone?"Fill in each product":"Tap the multiplier, then tap each inner term to draw arcs"}
+      </p>
+      <div ref={containerRef} style={{position:"relative",paddingTop:48,paddingBottom:48,minHeight:140,userSelect:"none"}}
+        onMouseMove={onDM} onMouseUp={onDE} onTouchMove={onDM} onTouchEnd={onDE}>
+        <svg style={{position:"absolute",inset:0,width:"100%",height:"100%",overflow:"visible",pointerEvents:"none"}}>
+          {arcPaths.map((a,i)=>(
+            <path key={i} d={a.path} stroke={a.color} fill="none"
+              strokeWidth={a.isActive?3.5:2}
+              opacity={arcsDone?(a.isActive?1:a.isDone?.35:.12):.8}/>
+          ))}
+          {dragArc&&<path d={dragArc} stroke="#9ca3af" fill="none" strokeWidth="2" strokeDasharray="5 3" opacity=".6"/>}
+        </svg>
+        <div style={{display:"flex",flexWrap:"wrap",gap:8,justifyContent:"center",alignItems:"center"}}>
+          <div ref={chip0Ref}
+            className={`chip${sel===0?" sel":""}${pairs.length>0?" g"+(pairs[0].ci+1):""}`}
+            style={arcsDone?{opacity:.5,transition:"opacity .3s"}:{}}
+            onClick={()=>{if(!arcsDone)setSel(0);}}
+            onMouseDown={onDS} onTouchStart={onDS}>
+            <KT tex={multTex}/>
+          </div>
+          <span style={{fontSize:22,color:"var(--gray-400)",fontWeight:300}}>(</span>
+          {inner.map((t,i)=>{
+            const pi=pairs.find(p=>p.i2===i);
+            const isA=arcsDone&&activePairIdx===i;
+            const bs=pi?{borderColor:GC[pi.ci].bd,background:GC[pi.ci].bg}:{};
+            const cs=arcsDone?{...bs,opacity:isA?1:.3,transition:"opacity .3s"}:bs;
+            return(
+              <div key={i} ref={el=>chipRefs.current[i]=el}
+                className="chip" style={{...cs,touchAction:"none"}}
+                onClick={()=>handleInner(i)}>
+                <KT tex={tToLatex(t,v,i===0)}/>
+              </div>
+            );
+          })}
+          <span style={{fontSize:22,color:"var(--gray-400)",fontWeight:300}}>)</span>
+        </div>
+      </div>
+      {arcsDone&&(
+        <div>
+          <BlankRow prefix={`${multTex}(${inner.map((t,i)=>tToLatex(t,v,i===0)).join("")}) =`} blanks={fillBlanks} filledBlanks={filled}
+            checkedBlanks={checked} activeBlankId={active} v={v}
+            onActivate={fActivate} onDrop={(id,tile)=>fTile(tile,id)}/>
+          {!allFillOk&&(
+            <>
+              <TileBank tiles={fillTiles} v={v} onTap={t=>fTile(t,null)} usedMap={usedMap}/>
+              <div style={{display:"flex",justifyContent:"center"}}>
+                <button onClick={fCheck}
+                  disabled={!fillBlanks.some(b=>filled[b.id]&&checked[b.id]!=="correct")}
+                  style={{minHeight:"var(--touch-target)",padding:"10px 28px",border:"none",
+                    borderRadius:"var(--radius-md)",background:bracketColor||"var(--primary)",color:"white",
+                    fontWeight:700,cursor:"pointer",fontSize:15,
+                    opacity:fillBlanks.some(b=>filled[b.id]&&checked[b.id]!=="correct")?1:.4}}>
+                  Check
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── MethodChoice ──────────────────────────────────────────────────────────────
+function MethodChoice({onChoose}){
+  return(
+    <div style={{textAlign:"center",padding:"14px 0"}}>
+      <p style={{color:"var(--gray-600)",marginBottom:14,fontSize:14}}>Choose your expansion method:</p>
+      <div style={{display:"flex",gap:12,justifyContent:"center",flexWrap:"wrap"}}>
+        <button onClick={()=>onChoose("distribute")}
+          style={{padding:"11px 22px",borderRadius:12,border:"2px solid #a5b4fc",
+            background:"#e0e7ff",color:"#4338ca",fontWeight:700,cursor:"pointer",fontSize:14}}>
+          📦 Distribute
+        </button>
+        <button onClick={()=>onChoose("rainbow")}
+          style={{padding:"11px 22px",borderRadius:12,border:"2px solid #fdba74",
+            background:"#fff7ed",color:"#c2410c",fontWeight:700,cursor:"pointer",fontSize:14}}>
+          🌈 Rainbow
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─── StepCard ─────────────────────────────────────────────────────────────────
+function StepCard({label,instruction,isCurrent,isCompleted,children}){
+  return(
+    <div className="step-card" style={{
+      border:`2px solid ${isCompleted?"var(--success)":isCurrent?"var(--primary)":"var(--gray-200)"}`,
+      background:isCompleted?"var(--success-light)":"var(--white)",
+      borderRadius:"var(--radius-lg)",padding:12,boxShadow:"var(--shadow-sm)",
+    }}>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:8,marginBottom:8}}>
+        <div style={{fontSize:12,fontWeight:700,color:isCompleted?"var(--success)":"var(--primary)"}}>{label}</div>
+        <div style={{fontSize:13,color:"var(--gray-700)",textAlign:"right"}}>{instruction}</div>
+      </div>
+      {children}
+    </div>
+  );
+}
+
+// ─── ProgressBar ──────────────────────────────────────────────────────────────
+function ProgressBar({current,total,correct,levelColor}){
+  return(
+    <div style={{marginBottom:12}}>
+      <div style={{display:"flex",justifyContent:"space-between",fontSize:13,color:"var(--gray-500)",marginBottom:4}}>
+        <span>Question {current} of {total}</span>
+        <span>✓ {correct}</span>
+      </div>
+      <div style={{height:6,borderRadius:3,background:"var(--gray-200)",overflow:"hidden"}}>
+        <div style={{height:"100%",width:`${(current-1)/total*100}%`,background:levelColor,transition:"width .3s ease",borderRadius:3}}/>
+      </div>
+    </div>
+  );
+}
+
+// ─── CollectStep ──────────────────────────────────────────────────────────────
+function CollectStep({allProds,simplified,v,onDone,accentColor}){
+  const blanks=useMemo(()=>simplified.map((t,i)=>({id:`cs-${i}`,correct:t})),[]);
+  const[tiles]=useState(()=>{
+    const req=simplified;
+    const dis=req.flatMap(t=>genDistractors(t,v));
+    return pickTiles(req,dis,Math.max(8,req.length+5));
+  });
+  const[filled,setFilled]=useState({});
+  const[checked,setChecked]=useState({});
+  const[active,setActive]=useState(blanks[0]?.id||null);
+  const allOk=blanks.every(b=>checked[b.id]==="correct");
+  const usedMap=useMemo(()=>{const m=new Map();Object.values(filled).forEach(t=>{const k=tKey(t);m.set(k,(m.get(k)||0)+1);});return m;},[filled]);
+
+  useEffect(()=>{
+    blanks.forEach(b=>{
+      const sameType=allProds.filter(t=>t.p===b.correct.p);
+      if(sameType.length===1&&!checked[b.id]){
+        setFilled(f=>({...f,[b.id]:b.correct}));
+        setChecked(c=>({...c,[b.id]:"correct"}));
+      }
+    });
+  },[]);
+
+  useEffect(()=>{if(allOk&&blanks.length>0)setTimeout(()=>onDone(!Object.values(checked).some(s=>s==="incorrect")),300);},[allOk]);
+
+  function activate(id){
+    if(checked[id]==="correct")return;
+    if(filled[id]){setFilled(f=>{const{[id]:_,...r}=f;return r;});setChecked(c=>({...c,[id]:undefined}));}
+    setActive(id);
+  }
+  function placeTile(tile,targetId){
+    const tid=targetId||(active&&checked[active]!=="correct"?active:blanks.find(b=>checked[b.id]!=="correct"&&!filled[b.id])?.id);
+    if(!tid)return;
+    const next=blanks.find(b=>b.id!==tid&&checked[b.id]!=="correct"&&!filled[b.id])?.id??tid;
+    setActive(next);setFilled(f=>({...f,[tid]:tile}));setChecked(c=>({...c,[tid]:undefined}));
+  }
+  function checkAll(){
+    const nc={...checked};let wrong=false;
+    blanks.forEach(b=>{
+      if(nc[b.id]==="correct"||!filled[b.id])return;
+      const ok=tEq(filled[b.id],b.correct);nc[b.id]=ok?"correct":"incorrect";if(!ok)wrong=true;
+    });
+    setChecked(nc);
+    const next=blanks.find(b=>nc[b.id]!=="correct"&&!filled[b.id])?.id??blanks.find(b=>nc[b.id]==="incorrect")?.id??null;
+    setActive(next);
+  }
+
+  // colour-code by power
+  const sortedPowers=[...new Set(allProds.map(t=>t.p))].sort((a,b)=>b-a);
+  const colorForPower={};
+  sortedPowers.forEach((p,i)=>colorForPower[p]=GC[i%GC.length]);
+
+  return(
+    <div>
+      <p style={{fontSize:12,color:"var(--gray-500)",textAlign:"center",marginBottom:6}}>
+        Expanded terms (like terms share a colour):
+      </p>
+      <div style={{display:"flex",flexWrap:"wrap",gap:6,justifyContent:"center",alignItems:"center",marginBottom:10}}>
+        <span style={{color:"var(--gray-500)",fontSize:14}}>=</span>
+        {allProds.map((t,i)=>{
+          const color=colorForPower[t.p];
+          return(
+            <span key={i} style={{
+              padding:"4px 10px",borderRadius:999,border:`2px solid ${color.bd}`,
+              background:color.bg,fontFamily:"Times New Roman,serif",fontSize:"1rem"
+            }}>
+              <KT tex={tToLatex(t,v,i===0)}/>
+            </span>
+          );
+        })}
+      </div>
+      <p style={{fontSize:12,color:"var(--gray-500)",textAlign:"center",marginBottom:6}}>
+        Write the simplified answer:
+      </p>
+      <BlankRow prefix="=" blanks={blanks} filledBlanks={filled} checkedBlanks={checked}
+        activeBlankId={active} v={v} onActivate={activate} onDrop={(id,tile)=>placeTile(tile,id)}/>
+      {!allOk&&(
+        <>
+          <TileBank tiles={tiles} v={v} onTap={t=>placeTile(t,null)} usedMap={usedMap}/>
+          <div style={{display:"flex",justifyContent:"center"}}>
+            <button onClick={checkAll}
+              disabled={!blanks.some(b=>filled[b.id]&&checked[b.id]!=="correct")}
+              style={{minHeight:"var(--touch-target)",padding:"10px 28px",border:"none",
+                borderRadius:"var(--radius-md)",background:accentColor||"var(--primary)",color:"white",
+                fontWeight:700,cursor:"pointer",fontSize:15,
+                opacity:blanks.some(b=>filled[b.id]&&checked[b.id]!=="correct")?1:.4}}>
+              Check
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// LEVEL 1 PROBLEM VIEW
+// ─────────────────────────────────────────────────────────────────────────────
+function L1ProblemView({problem,onComplete}){
+  const{v,mult,inner,products}=problem;
+  const[method,setMethod]=useState(null);
+  const[done,setDone]=useState(false);
+  const[correct,setCorrect]=useState(true);
+  const mTex=`${mult.coeff}`;
+  const innerTex=inner.map((t,i)=>tToLatex(t,v,i===0)).join("");
+  const ansTex=products.map((t,i)=>tToLatex(t,v,i===0)).join("");
+  function handleDone(prods,ok){if(!ok)setCorrect(false);setDone(true);}
+  return(
+    <div style={{display:"flex",flexDirection:"column",gap:10}}>
+      <div style={{background:"var(--level1-light)",border:"2px solid var(--level1)",
+        borderRadius:"var(--radius-lg)",padding:"14px 12px",textAlign:"center"}}>
+        <div style={{fontSize:11,color:"var(--gray-500)",textTransform:"uppercase",letterSpacing:".05em",marginBottom:4}}>
+          Expand and simplify
+        </div>
+        <div style={{fontSize:26}}><KT tex={`${mTex}(${innerTex})`}/></div>
+      </div>
+      {!done&&(
+        <StepCard label="Step 1" instruction="Expand the bracket" isCurrent={!method} isCompleted={false}>
+          {!method
+            ?<MethodChoice onChoose={setMethod}/>
+            :(
+              <div>
+                <div style={{fontSize:12,color:"var(--gray-500)",marginBottom:8}}>
+                  Using: <strong>{method==="rainbow"?"🌈 Rainbow":"📦 Distribute"}</strong>
+                  <button onClick={()=>setMethod(null)} style={{marginLeft:8,fontSize:11,color:"var(--primary)",background:"none",border:"none",cursor:"pointer",textDecoration:"underline"}}>change</button>
+                </div>
+                {method==="rainbow"
+                  ?<RainbowPhase mult={mult} inner={inner} v={v} onDone={handleDone} bracketColor="var(--level1)"/>
+                  :<DistributePhase mult={mult} inner={inner} v={v} onDone={handleDone} bracketColor="var(--level1)"/>
+                }
+              </div>
+            )
+          }
+        </StepCard>
+      )}
+      {done&&(
+        <StepCard label="Step 1" instruction="Expansion complete ✓" isCurrent={false} isCompleted={true}>
+          <div style={{textAlign:"center",fontSize:16}}><KT tex={`${mTex}(${innerTex}) = ${ansTex}`}/></div>
+        </StepCard>
+      )}
+      {done&&(
+        <div style={{display:"flex",justifyContent:"center",marginTop:4}}>
+          <button onClick={()=>onComplete(correct)}
+            style={{minHeight:"var(--touch-target)",padding:"10px 28px",border:"none",
+              borderRadius:"var(--radius-md)",background:"var(--level1)",color:"white",
+              fontWeight:700,cursor:"pointer",fontSize:15,boxShadow:"var(--shadow-sm)"}}>
+            Next Problem →
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// LEVEL 2 PROBLEM VIEW
+// ─────────────────────────────────────────────────────────────────────────────
+function L2ProblemView({problem,onComplete}){
+  const{v,m1,in1,p1,m2,in2,p2,op,allProds,simplified,s1,s2,a,b,c,d,e,f}=problem;
+  const[step,setStep]=useState(1);
+  const[method1,setMethod1]=useState(null);
+  const[method2,setMethod2]=useState(null);
+  const[correct,setCorrect]=useState(true);
+  function bad(){setCorrect(false);}
+  function handleB1Done(prods,ok){if(!ok)bad();setStep(2);}
+  function handleB2Done(prods,ok){if(!ok)bad();setStep(3);}
+  function handleCollectDone(ok){if(!ok)bad();setStep(4);}
+  
+  const b1Tex=`${a}(${b}${v}${s1>0?"+":`-`}${c})`;
+  const b2Tex=`${d}(${e}${v}${s2>0?"+":`-`}${f})`;
+  const opStr=op>0?"+":`-`;
+  const fullQTex=`${b1Tex} ${opStr} ${b2Tex}`;
+  const p1Tex=p1.map((t,i)=>tToLatex(t,v,i===0)).join("");
+  const p2Tex=p2.map((t,i)=>tToLatex(t,v,i===0)).join("");
+  const allProdsTex=allProds.map((t,i)=>tToLatex(t,v,i===0)).join("");
+  const simplTex=simplified.map((t,i)=>tToLatex(t,v,i===0)).join("");
+
+  // Create a modified m2 object that carries the negative sign if op is negative
+  const signedM2 = { ...m2, coeff: m2.coeff * op };
+  const signedM2Tex = tToLatex(signedM2, v, true); // e.g., "-5" instead of "5"
+
+  return(
+    <div style={{display:"flex",flexDirection:"column",gap:10}}>
+      <div style={{background:"var(--level2-light)",border:"2px solid var(--level2)",
+        borderRadius:"var(--radius-lg)",padding:"14px 12px",textAlign:"center"}}>
+        <div style={{fontSize:11,color:"var(--gray-500)",textTransform:"uppercase",letterSpacing:".05em",marginBottom:4}}>
+          Expand and simplify
+        </div>
+        <div style={{fontSize:24}}><KT tex={fullQTex}/></div>
+      </div>
+      <StepCard label="Step 1" instruction={`Expand ${b1Tex}`} isCurrent={step===1} isCompleted={step>1}>
+        {step===1?(
+          !method1
+            ?<MethodChoice onChoose={setMethod1}/>
+            :(
+              <div>
+                <div style={{fontSize:12,color:"var(--gray-500)",marginBottom:8}}>
+                  Using: <strong>{method1==="rainbow"?"🌈 Rainbow":"📦 Distribute"}</strong>
+                  <button onClick={()=>setMethod1(null)} style={{marginLeft:8,fontSize:11,color:"var(--primary)",background:"none",border:"none",cursor:"pointer",textDecoration:"underline"}}>change</button>
+                </div>
+                {method1==="rainbow"
+                  ?<RainbowPhase key="rb1" mult={m1} inner={in1} v={v} onDone={handleB1Done} bracketColor="var(--level2)"/>
+                  :<DistributePhase key="dp1" mult={m1} inner={in1} v={v} onDone={handleB1Done} bracketColor="var(--level2)"/>
+                }
+              </div>
+            )
+        ):(
+          <div style={{textAlign:"center",fontSize:15}}><KT tex={`${a}(${b}${v}${s1>0?"+":`-`}${c}) = ${p1Tex}`}/></div>
+        )}
+      </StepCard>
+      {step>=2&&(
+        <StepCard label="Step 2" instruction={`Expand ${op>0?"":"−"}${b2Tex}`} isCurrent={step===2} isCompleted={step>2}>
+          {step===2?(
+            !method2
+              ?<MethodChoice onChoose={setMethod2}/>
+              :(
+                <div>
+                  <div style={{fontSize:12,color:"var(--gray-500)",marginBottom:8}}>
+                    {op<0&&<span style={{color:"var(--error)",fontWeight:600,marginRight:6}}>Note: negative sign outside!</span>}
+                    Using: <strong>{method2==="rainbow"?"🌈 Rainbow":"📦 Distribute"}</strong>
+                    <button onClick={()=>setMethod2(null)} style={{marginLeft:8,fontSize:11,color:"var(--primary)",background:"none",border:"none",cursor:"pointer",textDecoration:"underline"}}>change</button>
+                  </div>
+                  {method2==="rainbow"
+                    ?<RainbowPhase key="rb2" mult={signedM2} inner={in2} v={v}
+                        onDone={(rawProds,ok)=>{const signed=rawProds.map(t=>({...t,coeff:t.coeff*op}));handleB2Done(signed,ok);}}
+                        bracketColor="var(--level2)"/>
+                    :<DistributePhase key="dp2" mult={signedM2} inner={in2} v={v}
+                        prefix={`${signedM2Tex}(${in2.map((t,i)=>tToLatex(t,v,i===0)).join("")}) =`}
+                        onDone={(rawProds,ok)=>{const signed=rawProds.map(t=>({...t,coeff:t.coeff*op}));handleB2Done(signed,ok);}}
+                        bracketColor="var(--level2)"/>
+                  }
+                  {op<0&&(
+                    <p style={{fontSize:12,color:"#b45309",textAlign:"center",marginTop:6,background:"#fef3c7",padding:"6px 10px",borderRadius:6}}>
+                      ⚠️ Remember to apply the <strong>−</strong> sign to every term in this bracket!
+                    </p>
+                  )}
+                </div>
+              )
+          ):(
+            <div style={{textAlign:"center",fontSize:15}}><KT tex={`${signedM2Tex}(${in2.map((t,i)=>tToLatex(t,v,i===0)).join("")}) = ${p2Tex}`}/></div>
+          )}
+        </StepCard>
+      )}
+      {step>=3&&(
+        <StepCard label="Step 3" instruction="Collect like terms and simplify" isCurrent={step===3} isCompleted={step>3}>
+          {step===3?(
+            <CollectStep allProds={allProds} simplified={simplified} v={v} onDone={handleCollectDone} accentColor="var(--level2)"/>
+          ):(
+            <div style={{textAlign:"center",fontSize:15}}><KT tex={`${allProdsTex} = ${simplTex}`}/></div>
+          )}
+        </StepCard>
+      )}
+      {step>=4&&(
+        <div style={{display:"flex",justifyContent:"center",marginTop:4}}>
+          <button onClick={()=>onComplete(correct)}
+            style={{minHeight:"var(--touch-target)",padding:"10px 28px",border:"none",
+              borderRadius:"var(--radius-md)",background:"var(--level2)",color:"white",
+              fontWeight:700,cursor:"pointer",fontSize:15,boxShadow:"var(--shadow-sm)"}}>
+            Next Problem →
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// LEVEL 3 PROBLEM VIEW  (ax + b)(cx + d)
+// Step 1: expand first term of bracket 1 (ax) across bracket 2  → Rainbow/Distribute
+// Step 2: expand second term of bracket 1 (b)  across bracket 2 → Rainbow/Distribute
+// Step 3: collect all 4 products into simplified form
+// ─────────────────────────────────────────────────────────────────────────────
+function L3ProblemView({problem,onComplete}){
+  const{v,b1,b2,prods1,prods2,allProds,simplified,qTex}=problem;
+  const[step,setStep]=useState(1);
+  const[method1,setMethod1]=useState(null);
+  const[method2,setMethod2]=useState(null);
+  const[correct,setCorrect]=useState(true);
+  function bad(){setCorrect(false);}
+  function handleP1Done(prods,ok){if(!ok)bad();setStep(2);}
+  function handleP2Done(prods,ok){if(!ok)bad();setStep(3);}
+  function handleCollectDone(ok){if(!ok)bad();setStep(4);}
+
+  // b1[0] is the "ax" term, b1[1] is the "b" constant
+  const m1Tex=tToLatex(b1[0],v,true);  // e.g. "3x"
+  const m2Tex=tToLatex(b1[1],v,true);  // e.g. "-5"
+  const b2InnerTex=b2.map((t,i)=>tToLatex(t,v,i===0)).join("");
+  const p1Tex=prods1.map((t,i)=>tToLatex(t,v,i===0)).join("");
+  const p2Tex=prods2.map((t,i)=>tToLatex(t,v,i===0)).join("");
+  const allProdsTex=allProds.map((t,i)=>tToLatex(t,v,i===0)).join("");
+  const simplTex=simplified.map((t,i)=>tToLatex(t,v,i===0)).join("");
+
+  // Check if the second multiplier (the constant term) is negative
+  const isSecondMultiplierNegative = b1[1].coeff < 0;
+
+  return(
+    <div style={{display:"flex",flexDirection:"column",gap:10}}>
+      {/* Question */}
+      <div style={{background:"var(--level3-light)",border:"2px solid var(--level3)",
+        borderRadius:"var(--radius-lg)",padding:"14px 12px",textAlign:"center"}}>
+        <div style={{fontSize:11,color:"var(--gray-500)",textTransform:"uppercase",letterSpacing:".05em",marginBottom:4}}>
+          Expand and simplify
+        </div>
+        <div style={{fontSize:26}}><KT tex={qTex}/></div>
+      </div>
+
+      {/* Step 1: multiply b1[0] (e.g. 3x) by all of b2 */}
+      <StepCard
+        label="Step 1"
+        instruction={`Multiply ${m1Tex} by (${b2InnerTex})`}
+        isCurrent={step===1} isCompleted={step>1}>
+        {step===1?(
+          !method1
+            ?<MethodChoice onChoose={setMethod1}/>
+            :(
+              <div>
+                <div style={{fontSize:12,color:"var(--gray-500)",marginBottom:8}}>
+                  Using: <strong>{method1==="rainbow"?"🌈 Rainbow":"📦 Distribute"}</strong>
+                  <button onClick={()=>setMethod1(null)} style={{marginLeft:8,fontSize:11,color:"var(--primary)",background:"none",border:"none",cursor:"pointer",textDecoration:"underline"}}>change</button>
+                </div>
+                {method1==="rainbow"
+                  ?<RainbowPhase key="rb1" mult={b1[0]} inner={b2} v={v} onDone={handleP1Done} bracketColor="var(--level3)"/>
+                  :<DistributePhase key="dp1" mult={b1[0]} inner={b2} v={v}
+                      prefix={`${m1Tex}(${b2InnerTex}) =`}
+                      onDone={handleP1Done} bracketColor="var(--level3)"/>
+                }
+              </div>
+            )
+        ):(
+          <div style={{textAlign:"center",fontSize:15}}>
+            <KT tex={`${m1Tex}(${b2InnerTex}) = ${p1Tex}`}/>
+          </div>
+        )}
+      </StepCard>
+
+      {/* Step 2: multiply b1[1] (e.g. -5) by all of b2 */}
+      {step>=2&&(
+        <StepCard
+          label="Step 2"
+          instruction={`Multiply ${m2Tex} by (${b2InnerTex})`}
+          isCurrent={step===2} isCompleted={step>2}>
+          {step===2?(
+            !method2
+              ?<MethodChoice onChoose={setMethod2}/>
+              :(
+                <div>
+                  <div style={{fontSize:12,color:"var(--gray-500)",marginBottom:8}}>
+                    {isSecondMultiplierNegative && <span style={{color:"var(--error)",fontWeight:600,marginRight:6}}>Note: negative sign outside!</span>}
+                    Using: <strong>{method2==="rainbow"?"🌈 Rainbow":"📦 Distribute"}</strong>
+                    <button onClick={()=>setMethod2(null)} style={{marginLeft:8,fontSize:11,color:"var(--primary)",background:"none",border:"none",cursor:"pointer",textDecoration:"underline"}}>change</button>
+                  </div>
+                  {method2==="rainbow"
+                    ?<RainbowPhase key="rb2" mult={b1[1]} inner={b2} v={v} onDone={handleP2Done} bracketColor="var(--level3)"/>
+                    :<DistributePhase key="dp2" mult={b1[1]} inner={b2} v={v}
+                        prefix={`${m2Tex}(${b2InnerTex}) =`}
+                        onDone={handleP2Done} bracketColor="var(--level3)"/>
+                  }
+                  {isSecondMultiplierNegative && (
+                    <p style={{fontSize:12,color:"#b45309",textAlign:"center",marginTop:6,background:"#fef3c7",padding:"6px 10px",borderRadius:6}}>
+                      ⚠️ Remember to apply the <strong>−</strong> sign to every term in this bracket!
+                    </p>
+                  )}
+                </div>
+              )
+          ):(
+            <div style={{textAlign:"center",fontSize:15}}>
+              <KT tex={`${m2Tex}(${b2InnerTex}) = ${p2Tex}`}/>
+            </div>
+          )}
+        </StepCard>
+      )}
+
+      {/* Step 3: collect all 4 products */}
+      {step>=3&&(
+        <StepCard label="Step 3" instruction="Collect like terms and simplify" isCurrent={step===3} isCompleted={step>3}>
+          {step===3?(
+            <CollectStep allProds={allProds} simplified={simplified} v={v} onDone={handleCollectDone} accentColor="var(--level3)"/>
+          ):(
+            <div style={{textAlign:"center",fontSize:15}}>
+              <KT tex={`${allProdsTex} = ${simplTex}`}/>
+            </div>
+          )}
+        </StepCard>
+      )}
+
+      {/* Done */}
+      {step>=4&&(
+        <div style={{display:"flex",justifyContent:"center",marginTop:4}}>
+          <button onClick={()=>onComplete(correct)}
+            style={{minHeight:"var(--touch-target)",padding:"10px 28px",border:"none",
+              borderRadius:"var(--radius-md)",background:"var(--level3)",color:"white",
+              fontWeight:700,cursor:"pointer",fontSize:15,boxShadow:"var(--shadow-sm)"}}>
+            Next Problem →
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Results Screen ────────────────────────────────────────────────────────────
+const LEVEL_CONFIG=[
+  {id:1,name:"Single Bracket",   form:"a(bx ± c)",           eg:"3(2x + 4)",        color:"var(--level1)",light:"var(--level1-light)",
+   desc:"Multiply a number into a bracket.",
+   methods:"🌈 Rainbow or 📦 Distribute",
+   hint:"💡 Multiply the number outside by each term inside. Watch the signs!"},
+  {id:2,name:"Add/Subtract Brackets", form:"a(bx±c) ± d(ex±f)", eg:"3(y + 3) - 5(3y - 3)", color:"var(--level2)",light:"var(--level2-light)",
+   desc:"Expand two brackets then collect like terms.",
+   methods:"🌈 Rainbow or 📦 Distribute for each bracket",
+   hint:"💡 Expand each bracket separately, then collect the x-terms and constants."},
+  {id:3,name:"Double Brackets",  form:"(ax + b)(cx + d)",    eg:"(w - 5)(3w + 4)",  color:"var(--level3)",light:"var(--level3-light)",
+   desc:"Multiply two brackets together, term by term.",
+   methods:"🌈 Rainbow or 📦 Distribute — applied twice",
+   hint:"💡 Expand each term of the first bracket across the second, then collect like terms."},
+];
+
+function ResultsScreen({score,total,time,flags,level,onRetry,onMenu}){
+  const perfect=score===total,good=score/total>=.6;
+  const emoji=perfect?"🎉":good?"👍":"💪";
+  const msg=perfect?"Perfect set!":good?"Nice work!":"Keep practising!";
+  const lv=LEVEL_CONFIG.find(l=>l.id===level);
+  const fmt=n=>`${Math.floor(n/60)}:${String(n%60).padStart(2,"0")}`;
+  return(
+    <div style={{flex:1,display:"flex",flexDirection:"column",justifyContent:"center",padding:18}}>
+      <div style={{textAlign:"center",marginBottom:20}}>
+        <div style={{fontSize:48,marginBottom:8}}>{emoji}</div>
+        <h2 style={{fontSize:26,fontWeight:800,marginBottom:6}}>{msg}</h2>
+        <div style={{color:"var(--gray-500)",fontSize:14}}>Level {level} · {lv?.name}</div>
+      </div>
+      <div style={{display:"flex",justifyContent:"center",gap:32,marginBottom:20}}>
+        <div style={{textAlign:"center"}}>
+          <div style={{fontSize:36,fontWeight:800,color:lv?.color}}>{score}/{total}</div>
+          <div style={{fontSize:13,color:"var(--gray-500)"}}>Score</div>
+        </div>
+        <div style={{textAlign:"center"}}>
+          <div style={{fontSize:36,fontWeight:800,color:"var(--gray-700)"}}>{fmt(time)}</div>
+          <div style={{fontSize:13,color:"var(--gray-500)"}}>Time</div>
+        </div>
+      </div>
+      <div style={{display:"flex",justifyContent:"center",gap:8,marginBottom:24,flexWrap:"wrap"}}>
+        {flags.map((f,i)=>(
+          <div key={i} style={{width:38,height:38,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",
+            background:f?"var(--success-light)":"var(--error-light)",
+            color:f?"var(--success)":"var(--error)",fontWeight:800,fontSize:18}}>
+            {f?"✓":"✗"}
+          </div>
+        ))}
+      </div>
+      <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
+        <button onClick={onRetry} style={{minHeight:"var(--touch-target)",padding:"10px 24px",border:"none",
+          borderRadius:"var(--radius-md)",background:lv?.color,color:"white",fontWeight:700,cursor:"pointer"}}>
+          Retry Level
+        </button>
+        <button onClick={onMenu} style={{minHeight:"var(--touch-target)",padding:"10px 24px",
+          border:"2px solid var(--gray-200)",borderRadius:"var(--radius-md)",
+          background:"var(--white)",color:"var(--gray-700)",fontWeight:700,cursor:"pointer"}}>
+          Level Select
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─── Level Select ──────────────────────────────────────────────────────────────
+function LevelSelect({onStart}){
+  return(
+    <div style={{padding:"12px 8px",overflowY:"auto",flex:1}}>
+      <div style={{marginBottom:16}}>
+        <h1 style={{fontSize:22,fontWeight:700,color:"var(--primary)",marginBottom:4}}>
+          Expansion of Algebraic Expressions
+        </h1>
+        <p style={{fontSize:13,color:"var(--gray-500)"}}>
+          Tap or drag tiles to fill in each answer.
+        </p>
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"1fr",gap:10,maxWidth:480,margin:"0 auto"}}>
+        {LEVEL_CONFIG.map(lv=>(
+          <div key={lv.id} style={{border:`3px solid ${lv.color}`,borderRadius:"var(--radius-lg)",padding:12,background:"var(--white)"}}>
+            <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:4}}>
+              <span style={{padding:"2px 8px",borderRadius:"var(--radius-sm)",fontSize:11,fontWeight:700,color:"white",background:lv.color}}>
+                Level {lv.id}
+              </span>
+              <span style={{fontSize:16,fontWeight:700,color:"var(--gray-800)"}}>{lv.name}</span>
+            </div>
+            <p style={{fontSize:13,color:"var(--gray-500)",marginBottom:6}}>{lv.desc}</p>
+            <div style={{padding:"8px 10px",background:lv.light,borderRadius:"var(--radius-md)",
+              fontSize:20,textAlign:"center",fontFamily:"Times New Roman,serif",marginBottom:8}}>
+              <KT tex={lv.eg}/>
+            </div>
+            <div style={{fontSize:12,color:"var(--gray-500)",marginBottom:10}}>
+              <strong>Form:</strong> <code style={{background:"var(--gray-100)",padding:"1px 6px",borderRadius:4}}>{lv.form}</code>
+              &nbsp;·&nbsp; <strong>Methods:</strong> {lv.methods}
+            </div>
+            <button onClick={()=>onStart(lv.id)}
+              style={{width:"100%",minHeight:"var(--touch-target)",border:"none",
+                borderRadius:"var(--radius-md)",background:lv.color,color:"white",
+                fontSize:15,fontWeight:700,cursor:"pointer"}}>
+              Start Level {lv.id}
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── Practice Screen ───────────────────────────────────────────────────────────
+function PracticeScreen({level,onBack,onFinish}){
+  const[problems]=useState(()=>buildProblems(level));
+  const[idx,setIdx]=useState(0);
+  const[flags,setFlags]=useState([]);
+  const[secs,setSecs]=useState(0);
+  const timerRef=useRef(null);
+  const lv=LEVEL_CONFIG.find(l=>l.id===level);
+
+  useEffect(()=>{
+    timerRef.current=setInterval(()=>setSecs(s=>s+1),1000);
+    return()=>clearInterval(timerRef.current);
+  },[]);
+
+  function handleComplete(correct){
+    const nf=[...flags,correct];
+    if(idx+1>=problems.length){clearInterval(timerRef.current);onFinish({flags:nf,time:secs});}
+    else{setFlags(nf);setIdx(i=>i+1);}
+  }
+
+  const fmt=n=>`${Math.floor(n/60)}:${String(n%60).padStart(2,"0")}`;
+
+  return(
+    <div style={{display:"flex",flexDirection:"column",height:"100%"}}>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
+        <button onClick={onBack} style={{background:"none",border:"none",color:"var(--gray-500)",cursor:"pointer",fontSize:14}}>
+          ← Back
+        </button>
+        <div style={{fontSize:13,color:"var(--gray-500)"}}>{fmt(secs)}</div>
+      </div>
+      <ProgressBar current={idx+1} total={problems.length} correct={flags.filter(Boolean).length} levelColor={lv?.color}/>
+      <div style={{fontSize:12,fontWeight:600,color:lv?.color,marginBottom:6,letterSpacing:".04em"}}>
+        QUESTION {idx+1} / {problems.length}
+      </div>
+      <div style={{overflowY:"auto",flex:1}}>
+        {level===1&&<L1ProblemView key={`l1-${idx}`} problem={problems[idx]} onComplete={handleComplete}/>}
+        {level===2&&<L2ProblemView key={`l2-${idx}`} problem={problems[idx]} onComplete={handleComplete}/>}
+        {level===3&&<L3ProblemView key={`l3-${idx}`} problem={problems[idx]} onComplete={handleComplete}/>}
+      </div>
+      <div style={{marginTop:10,padding:"8px 10px",borderRadius:"var(--radius-md)",
+        background:"var(--warning-light)",fontSize:13,color:"#92400e"}}>
+        {lv?.hint}
+      </div>
+    </div>
+  );
+}
+
+// ─── App ───────────────────────────────────────────────────────────────────────
+function App(){
+  const[screen,setScreen]=useState("level");
+  const[activeLevel,setActiveLevel]=useState(null);
+  const[results,setResults]=useState(null);
+  function startLevel(lv){setActiveLevel(lv);setScreen("practice");}
+  return(
+    <div style={{width:"100%",minHeight:"100dvh",maxWidth:580,margin:"0 auto",padding:8,display:"flex"}}>
+      <div style={{background:"var(--white)",borderRadius:"var(--radius-xl)",
+        boxShadow:"var(--shadow-lg)",padding:"10px 12px",
+        width:"100%",display:"flex",flexDirection:"column",minHeight:0}}>
+        {screen==="level"&&<LevelSelect onStart={startLevel}/>}
+        {screen==="practice"&&(
+          <PracticeScreen level={activeLevel}
+            onBack={()=>setScreen("level")}
+            onFinish={data=>{setResults(data);setScreen("results");}}/>
+        )}
+        {screen==="results"&&results&&(
+          <ResultsScreen
+            score={results.flags.filter(Boolean).length}
+            total={results.flags.length}
+            time={results.time} flags={results.flags} level={activeLevel}
+            onRetry={()=>setScreen("practice")}
+            onMenu={()=>setScreen("level")}/>
+        )}
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
